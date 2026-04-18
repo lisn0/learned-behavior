@@ -34,10 +34,16 @@ Every lesson has a `confidence` score and a `status` (`candidate` → `approved`
 
 Run `learned-behavior promote` and `learned-behavior decay` nightly (or via a cron/Stop hook) and the corpus gets better without human curation.
 
+## Requirements
+
+- Python 3.10+ (uses PEP 604 union syntax and built-in generic type parameters)
+- SQLite 3 (ships with Python's `sqlite3` module)
+- No third-party runtime dependencies
+
 ## Install
 
 ```bash
-git clone https://github.com/<you>/learned-behavior ~/workshop/learned-behavior
+git clone https://github.com/lisn0/learned-behavior ~/workshop/learned-behavior
 bash ~/workshop/learned-behavior/install.sh
 ```
 
@@ -45,11 +51,21 @@ Installer symlinks the CLI into `~/.local/bin/learned-behavior` and creates the 
 
 ## Per-agent setup
 
-See `docs/`:
+**Claude Code is the only agent that supports automatic observation** (via its `settings.local.json` hook system). Every other agent integration below is a manual "paste advice into the model's context, record lessons by hand when something goes wrong" flow. The lesson corpus is shared — if you run Claude Code alongside another tool, its mined lessons surface everywhere.
 
-- [docs/claude-code.md](docs/claude-code.md) — drop-in `settings.local.json` hooks
-- [docs/codex.md](docs/codex.md) — Codex session integration
-- [docs/copilot.md](docs/copilot.md) — Copilot workflow
+| Agent | Integration | Docs |
+|-------|-------------|------|
+| Claude Code | Automatic — hooks observe every tool call | [docs/claude-code.md](docs/claude-code.md) |
+| Codex (OpenAI CLI / VS Code) | Manual | [docs/codex.md](docs/codex.md) |
+| GitHub Copilot | Manual (rules file or Copilot Chat paste) | [docs/copilot.md](docs/copilot.md) |
+| Cursor | Manual (writes to `.cursor/rules/`) | [docs/cursor.md](docs/cursor.md) |
+| Windsurf / Codeium Cascade | Manual (writes to `.windsurfrules`) | [docs/windsurf.md](docs/windsurf.md) |
+| Google Antigravity | Manual | [docs/antigravity.md](docs/antigravity.md) |
+| Gemini / Jules / Gemini Code Assist | Manual (writes to `GEMINI.md`) | [docs/gemini.md](docs/gemini.md) |
+| Aider | Manual (`aider --read CONVENTIONS.md`) | [docs/aider.md](docs/aider.md) |
+| Continue.dev | Manual (writes to `.continue/rules/`) | [docs/continue.md](docs/continue.md) |
+
+Have another agent that should be here? PRs welcome — the CLI is agent-neutral (the `--agent` flag just tags provenance) so adding a new one is mostly a docs task.
 
 ## Per-project skill registry (optional)
 
@@ -82,9 +98,20 @@ learned-behavior promote --dry-run                # preview candidates ready to 
 learned-behavior decay --dry-run                  # preview lessons going dormant
 learned-behavior reinforce --session-id <id>      # +/- confidence based on whether surfaced advice held
 learned-behavior suggest-hooks --workspace "$PWD" # report missing hook wiring for this project
+learned-behavior suggest-skills --workspace "$PWD" # surface repeated raw commands that deserve a skill
+learned-behavior maintain --write                 # rate-limited nightly promote+decay
 ```
 
 Add `--write` (or drop `--dry-run`) to apply.
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+pytest tests/
+```
+
+Tests are self-contained — they spin up an ephemeral SQLite DB in a tmp dir; nothing touches your real learning DB.
 
 ## Design
 
