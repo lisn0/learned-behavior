@@ -1,0 +1,68 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "learned-behavior"
+version = "0.1.0"
+description = "Self-improving memory for AI coding agents. Observes agent hooks, distills recurring patterns into rules, surfaces them before each task."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "learned-behavior contributors" }]
+keywords = [
+    "ai", "agents", "claude", "claude-code", "codex", "copilot",
+    "cursor", "windsurf", "aider", "gemini",
+    "memory", "lessons", "rules", "observability",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Utilities",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+learned-behavior = "learning:main"
+
+[project.urls]
+Homepage = "https://github.com/lisn0/learned-behavior"
+Source = "https://github.com/lisn0/learned-behavior"
+Issues = "https://github.com/lisn0/learned-behavior/issues"
+
+[tool.hatch.build.targets.wheel]
+# learning.py is a top-level single-file module; config/ ships alongside it
+# because load_skill_registry() reads config/default-skill-registry.json
+# relative to the module file.
+include = [
+    "learning.py",
+    "config/default-skill-registry.json",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "learning.py",
+    "config/",
+    "docs/",
+    "examples/",
+    "tests/",
+    "install.sh",
+    "README.md",
+    "LICENSE",
+    "DESIGN.md",
+    "pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
