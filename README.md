@@ -40,6 +40,23 @@ Run `learned-behavior promote` and `learned-behavior decay` nightly (or via a cr
 - SQLite 3 (ships with Python's `sqlite3` module)
 - No third-party runtime dependencies
 
+## Side effects & permissions
+
+Full disclosure of everything the plugin touches on your machine:
+
+- **Hooks registered**: `SessionStart`, `UserPromptSubmit`, `PostToolUse *`, `Stop`, `SessionEnd` — all invoke `python3 ${CLAUDE_PLUGIN_ROOT}/learning.py <subcommand>`. Each call has a short timeout (3–5s) and fails open.
+- **Files written**: one SQLite DB at `~/.local/share/learned-behavior/learning.db` (or `$LEARNED_BEHAVIOR_HOME` if set). Nothing else is created or modified outside that directory.
+- **Network**: none. No telemetry, no outbound requests, no phone-home. All processing is local.
+- **Execution surface**: the CLI reads stdin/argv, queries/writes the SQLite DB, prints JSON or text to stdout. It does not spawn subprocesses, shell out, or touch files outside its own data dir.
+- **Destructive subcommands**: `promote`, `decay`, `reinforce`, `maintain` default to dry-run. They only mutate the DB when you pass `--write`.
+- **Trust boundary**: `observe` records hook payloads into SQLite verbatim. If you don't want a particular command or path recorded, don't run it while hooks are active.
+
+## Disable / uninstall
+
+- **Plugin (Claude Code)**: `/plugin uninstall learned-behavior@learned-behavior` — removes hooks immediately.
+- **Manual hooks**: delete the `hooks` block from your `.claude/settings.local.json`.
+- **Data**: the SQLite DB persists after uninstall. Remove it explicitly with `rm -rf ~/.local/share/learned-behavior/` (or `$LEARNED_BEHAVIOR_HOME`).
+
 ## Install
 
 ```bash
