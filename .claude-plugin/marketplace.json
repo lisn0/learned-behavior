@@ -2,7 +2,7 @@
   "name": "learned-behavior",
   "owner": {
     "name": "lisn0",
-    "url": "https://github.com/lisn0"
+    "email": "bilelzened@gmail.com"
   },
   "metadata": {
     "description": "Self-improving memory for AI coding agents. Observes hooks, distills patterns into rules, surfaces them before each task.",
@@ -11,16 +11,20 @@
   "plugins": [
     {
       "name": "learned-behavior",
-      "description": "Self-improving rule corpus mined from Claude Code hooks. Surfaces approved lessons before each task, reinforces rules that hold, decays stale ones.",
+      "source": "./",
+      "description": "Self-improving rule corpus mined from Claude Code hooks. Surfaces approved lessons before each task, reinforces rules that hold, decays stale ones. Self-contained — no extra install needed.",
       "version": "0.1.0",
-      "source": {
-        "source": "github",
-        "repo": "lisn0/learned-behavior"
+      "author": {
+        "name": "lisn0",
+        "email": "bilelzened@gmail.com"
       },
+      "homepage": "https://github.com/lisn0/learned-behavior",
+      "repository": "https://github.com/lisn0/learned-behavior",
+      "license": "MIT",
+      "keywords": ["memory", "rules", "learning", "hooks", "observability"],
       "category": "productivity",
       "tags": ["memory", "rules", "learning", "hooks", "observability"],
-      "homepage": "https://github.com/lisn0/learned-behavior",
-      "license": "MIT"
+      "strict": false
     }
   ]
 }

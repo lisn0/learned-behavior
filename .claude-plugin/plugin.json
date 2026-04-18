@@ -1,0 +1,13 @@
+{
+  "name": "learned-behavior",
+  "version": "0.1.0",
+  "description": "Self-improving memory for AI coding agents. Observes tool use, distills recurring patterns into rules, surfaces relevant lessons before each task.",
+  "author": {
+    "name": "lisn0",
+    "email": "bilelzened@gmail.com"
+  },
+  "homepage": "https://github.com/lisn0/learned-behavior",
+  "repository": "https://github.com/lisn0/learned-behavior",
+  "license": "MIT",
+  "keywords": ["memory", "rules", "learning", "hooks", "observability"]
+}
