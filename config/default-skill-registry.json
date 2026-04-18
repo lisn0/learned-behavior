@@ -1,0 +1,24 @@
+{
+  "skill_registry": [
+    {
+      "pattern": "\\bgit\\s+push\\s+[^\\n]*--no-verify\\b",
+      "skill": "git-safety",
+      "reason": "Never bypass pre-push hooks with --no-verify; fix the underlying failure."
+    },
+    {
+      "pattern": "\\bgit\\s+commit\\s+[^\\n]*--no-verify\\b",
+      "skill": "git-safety",
+      "reason": "Never bypass commit hooks with --no-verify; fix what the hook is catching."
+    },
+    {
+      "pattern": "\\bgit\\s+push\\s+[^\\n]*--force\\b(?!.*--force-with-lease)",
+      "skill": "git-safety",
+      "reason": "Prefer --force-with-lease over raw --force on shared branches."
+    },
+    {
+      "pattern": "\\brm\\s+-rf\\s+/(?!tmp\\b)",
+      "skill": "rm-safety",
+      "reason": "rm -rf on a top-level path is almost never what you want. Double-check the target."
+    }
+  ]
+}

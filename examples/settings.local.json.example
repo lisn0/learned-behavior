@@ -1,0 +1,64 @@
+{
+  "_comment": "Drop the `hooks` block into your project's .claude/settings.local.json. Paths use $HOME so no edits needed per project.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py observe --agent claude --event-name SessionStart"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py advice --agent claude --workspace \"$CLAUDE_PROJECT_DIR\" --session-id \"$CLAUDE_SESSION_ID\" --output claude-json"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py observe --agent claude --event-name UserPromptSubmit"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py observe --agent claude --event-name PostToolUse"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py session-check --agent claude --workspace \"$CLAUDE_PROJECT_DIR\" --output stop-json"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py observe --agent claude --event-name SessionEnd"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.local/share/learned-behavior/scripts/learning.py reinforce --session-id \"$CLAUDE_SESSION_ID\" --write"
+          }
+        ]
+      }
+    ]
+  }
+}
