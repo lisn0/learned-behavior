@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+import sys as _sys
+if _sys.version_info < (3, 10):
+    _sys.stderr.write("learned-behavior requires Python 3.10+ (detected {}).\n".format(
+        ".".join(map(str, _sys.version_info[:3]))))
+    _sys.exit(2)
+
 import argparse
 import hashlib
 import json
@@ -94,6 +100,13 @@ AGENT_ALIASES = {
     "claude": "claude",
     "codex": "claude",
     "copilot": "copilot",
+    "cursor": "cursor",
+    "windsurf": "windsurf",
+    "antigravity": "antigravity",
+    "gemini": "gemini",
+    "jules": "gemini",
+    "aider": "aider",
+    "continue": "continue",
 }
 
 
@@ -107,7 +120,8 @@ def parse_args() -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     observe = subparsers.add_parser("observe", help="Record a hook or manual event")
-    observe.add_argument("--agent", required=True, choices=tuple(AGENT_ALIASES))
+    observe.add_argument("--agent", default="claude",
+                         help="Agent label for provenance (default: claude). Any string accepted.")
     observe.add_argument("--stdin-json", action="store_true")
     observe.add_argument("--event-name")
     observe.add_argument("--workspace")
@@ -125,7 +139,8 @@ def parse_args() -> argparse.Namespace:
     )
 
     advice = subparsers.add_parser("advice", help="Print relevant approved lessons")
-    advice.add_argument("--agent", required=True, choices=tuple(AGENT_ALIASES))
+    advice.add_argument("--agent", default="claude",
+                        help="Agent label for provenance (default: claude). Any string accepted.")
     advice.add_argument("--workspace")
     advice.add_argument("--task")
     advice.add_argument("--stdin-json", action="store_true")
@@ -143,7 +158,8 @@ def parse_args() -> argparse.Namespace:
     )
 
     learn = subparsers.add_parser("learn", help="Persist an approved lesson")
-    learn.add_argument("--agent", required=True, choices=tuple(AGENT_ALIASES))
+    learn.add_argument("--agent", default="claude",
+                       help="Agent label for provenance (default: claude). Any string accepted.")
     learn.add_argument("--workspace", required=True)
     learn.add_argument("--title", required=True)
     learn.add_argument("--rule", required=True)
@@ -155,6 +171,8 @@ def parse_args() -> argparse.Namespace:
     review.add_argument("--workspace", required=True)
     review.add_argument("--days", type=int, default=14)
     review.add_argument("--limit", type=int, default=10)
+    review.add_argument("--all", action="store_true",
+                        help="Include candidate lessons (default: approved only)")
 
     init_db = subparsers.add_parser("init-db", help="Create the database schema")
     init_db.add_argument("--workspace", default=str(Path.cwd()))
@@ -304,7 +322,8 @@ def load_stdin_json() -> dict[str, Any]:
 
 
 def canonical_agent(agent: str) -> str:
-    return AGENT_ALIASES[agent]
+    """Map an agent label to its canonical form. Unknown labels pass through unchanged."""
+    return AGENT_ALIASES.get(agent, agent)
 
 
 def parse_possible_json(value: Any) -> Any:
@@ -993,11 +1012,12 @@ def command_review(args: argparse.Namespace) -> int:
         (workspace, since, args.limit),
     ).fetchall()
 
+    status_clause = "" if args.all else "AND status = 'approved'"
     lessons = conn.execute(
-        """
+        f"""
         SELECT status, title, rule_text, confidence, observations, updated_at
         FROM lessons
-        WHERE workspace = ?
+        WHERE workspace = ? {status_clause}
         ORDER BY
             CASE status WHEN 'approved' THEN 0 ELSE 1 END,
             updated_at DESC
@@ -1007,10 +1027,11 @@ def command_review(args: argparse.Namespace) -> int:
     ).fetchall()
 
     lines = [f"Continuous learning review for {workspace}"]
-    if repeated:
+    filtered = [r for r in repeated if not _is_noise(normalize_error_text(r["summary"] or ""))]
+    if filtered:
         lines.append("")
         lines.append("Repeated failures:")
-        for row in repeated:
+        for row in filtered:
             lines.append(
                 f"- {row['count']}x {row['tool_name'] or 'tool'}: {truncate(row['summary'], 140)} "
                 f"(last seen {row['last_seen']})"
