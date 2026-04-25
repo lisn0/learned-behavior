@@ -51,6 +51,15 @@ Run `learned-behavior promote` and `learned-behavior decay` nightly (or via a cr
 - SQLite 3 (ships with Python's `sqlite3` module)
 - No third-party runtime dependencies
 
+## Privacy
+
+- **No network calls.** The plugin never reaches out to any server — no telemetry, no analytics, no phone-home, no auto-update check.
+- **No data leaves your machine.** Everything is stored in one local SQLite file at `~/.local/share/learned-behavior/learning.db` (or `$LEARNED_BEHAVIOR_HOME`).
+- **No third parties.** Zero runtime dependencies; nothing to ship your data to even if it tried.
+- **You own the data.** Delete the SQLite file at any time and the plugin starts fresh. See [Disable / uninstall](#disable--uninstall).
+
+There is no separate privacy policy because there is nothing to disclose beyond the above. Full technical detail of every file touched and every hook registered is in the next section.
+
 ## Side effects & permissions
 
 Full disclosure of everything the plugin touches on your machine:

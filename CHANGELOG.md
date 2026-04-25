@@ -2,6 +2,11 @@
 
 All notable changes to `learned-behavior` are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- README "Privacy" section with stable `#privacy` anchor — explicit no-network / no-telemetry / no-third-parties guarantees, separate from the existing "Side effects & permissions" technical breakdown.
+
 ## [0.2.0] — 2026-04-25
 
 ### Added
