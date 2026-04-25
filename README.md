@@ -161,6 +161,18 @@ In any project, create `.claude/learned-behavior.json` to declare skill-bypass r
 
 Patterns are Python regex. Project config is merged over the default registry.
 
+## Slash commands (Claude Code plugin)
+
+When installed as a plugin, three on-demand commands are available — nothing fires automatically beyond the hooks already documented above. The user must invoke them.
+
+| Command | Purpose |
+|---------|---------|
+| `/learned-behavior:advice` | Show approved lessons relevant to the current workspace |
+| `/learned-behavior:review` | Summary of stored lessons (approved + candidates) and recurring errors for this workspace |
+| `/learned-behavior:mine` | Run the four miners — error clustering, Edit self-corrections, skill bypasses, guard blocks — and surface new candidate lessons |
+
+`mine` only proposes candidates; promotion to `approved` remains a separate explicit step (`learning.py promote --write`).
+
 ## CLI
 
 ```

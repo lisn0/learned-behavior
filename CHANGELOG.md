@@ -2,6 +2,18 @@
 
 All notable changes to `learned-behavior` are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-04-25
+
+### Added
+- Three on-demand slash commands for the Claude Code plugin — invoked manually, nothing fires automatically:
+  - `/learned-behavior:advice` — show approved lessons for the current workspace
+  - `/learned-behavior:review` — summary of stored lessons and recurring errors for this workspace
+  - `/learned-behavior:mine` — run the four miners (errors, edits, skill bypasses, guard blocks) and surface new candidate lessons
+- README "Slash commands" section documenting the new commands.
+
+### Notes
+- Promotion of mined candidates remains a deliberate, separate step (`learning.py promote --write`); `/learned-behavior:mine` only proposes.
+
 ## [0.1.0] — 2026-04-25
 
 Initial public release.

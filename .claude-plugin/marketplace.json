@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Self-improving memory for AI coding agents. Observes hooks, distills patterns into rules, surfaces them before each task.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "learned-behavior",
       "source": "./",
       "description": "Self-improving rule corpus mined from Claude Code hooks. Surfaces approved lessons before each task, reinforces rules that hold, decays stale ones. Self-contained — no extra install needed.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "lisn0",
         "email": "bilelzened@gmail.com"
