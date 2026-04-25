@@ -1,10 +1,21 @@
 # learned-behavior
 
+[![tests](https://github.com/lisn0/learned-behavior/actions/workflows/test.yml/badge.svg)](https://github.com/lisn0/learned-behavior/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/learned-behavior.svg)](https://pypi.org/project/learned-behavior/)
+
 Self-improving memory for AI coding agents (Claude Code, Codex, Copilot).
 
 Observes what your agent does, distills recurring patterns into lessons, surfaces the relevant ones before each task, and **auto-promotes** rules that keep proving themselves while **decaying** stale ones.
 
 No self-report. No LLM in the loop. Pure behavioral signal mined from agent hook events.
+
+## What it isn't
+
+- Not a coding-style linter — it doesn't read your code, only your agent's tool calls.
+- Not a context-window manager or summarizer — lessons are short rules, not session memory.
+- Not cloud-hosted — all storage and processing is local SQLite. Nothing leaves your machine.
 
 ## What it captures
 
@@ -65,6 +76,57 @@ bash ~/workshop/learned-behavior/install.sh
 ```
 
 Installer symlinks the CLI into `~/.local/bin/learned-behavior` and creates the data directory at `~/.local/share/learned-behavior/` (or `$LEARNED_BEHAVIOR_HOME` if set).
+
+## Example: from observation to advice
+
+End-to-end lifecycle of a single lesson — observed, mined, surfaced.
+
+**1. Agent makes the same edit twice in a session.** It writes `bash -lc 'php artisan ...'` inside a `laravelphp/vapor` Dockerfile, the build fails with `bash: not found`, and the agent corrects it to `sh -c 'php artisan ...'`. The `PostToolUse` hook records both Edits and the failure.
+
+**2. Mining clusters the self-correction into a candidate lesson.**
+
+```
+$ learned-behavior mine-edits --workspace "$PWD"
+[candidate] 3 sessions replaced "bash -lc" → "sh -c" in Dockerfile* — proposed rule:
+  "On laravelphp/vapor images, use sh -c (not bash -lc) for inline commands"
+```
+
+**3. After ≥ N observations across ≥ M days with no contradicting signal, `promote` graduates it to `approved`.**
+
+```
+$ learned-behavior promote --write
+Promoted 1 lesson to approved: "Use sh, not bash, on vapor images"
+```
+
+**4. Next session, the `UserPromptSubmit` hook surfaces it before the agent does anything.**
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": "Relevant lessons from the shared learning DB:\n- Use sh, not bash, on vapor images: laravelphp/vapor base image has no bash; use 'sh -c' for inline commands"
+  }
+}
+```
+
+**5. If the lesson isn't triggered for X days, `decay` lowers its confidence and eventually marks it `dormant`** — it stops appearing in `advice` until the underlying pattern resurfaces.
+
+## Troubleshooting
+
+**Advice isn't showing up in my next session.**
+Approved lessons only surface for the workspace they were learned in. Confirm with `learned-behavior review --workspace "$PWD"`. If you see lessons listed there but they aren't appearing in-session, your hook may be timing out — check Claude Code's hook logs (the plugin fails open by design, so a timeout is silent).
+
+**Lessons aren't being created from my repeated errors.**
+Candidates need ≥ N observations over ≥ M days before promotion (`mine` clusters them, `promote` graduates them). Run `learned-behavior mine --workspace "$PWD"` and `learned-behavior review` to see what's still in `candidate` state. Lower the thresholds with `--min-observations` / `--min-age-days` on `promote` if you want faster graduation.
+
+**The SQLite DB is getting large.**
+Hook events accumulate. The DB lives at `~/.local/share/learned-behavior/learning.db` (or `$LEARNED_BEHAVIOR_HOME`). It's safe to delete — you'll lose history but lessons currently in `approved` state can be re-mined from any retained event source. There's no built-in pruning yet; if size becomes a problem, file an issue.
+
+**A noisy or wrong lesson keeps appearing.**
+Use `learned-behavior review` to find its ID, then mark it dormant manually (or wait for `decay` to do it). A future release will add a `forget` subcommand.
+
+**Hook failing open — how do I tell?**
+By design, every hook has a 3–5s timeout and swallows errors so a misbehaving plugin can't block your session. To debug, run the same command from your shell with the same env vars (`CLAUDE_PROJECT_DIR`, `CLAUDE_SESSION_ID`) and inspect stderr.
 
 ## Per-agent setup
 
@@ -133,6 +195,10 @@ Tests are self-contained — they spin up an ephemeral SQLite DB in a tmp dir; n
 ## Design
 
 See [DESIGN.md](DESIGN.md) for the state machine, scoring formula, and why we chose behavioral signal over self-report.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 

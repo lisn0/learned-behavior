@@ -12,3 +12,9 @@ venv/
 .vscode/
 tmp/
 data/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.coverage
+.tox/
