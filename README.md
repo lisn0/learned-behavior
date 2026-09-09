@@ -188,6 +188,7 @@ When installed as a plugin, three on-demand commands are available — nothing f
 learned-behavior advice --workspace "$PWD"        # lessons relevant to this project
 learned-behavior learn ...                        # persist a new lesson manually
 learned-behavior review --workspace "$PWD"        # summary of lessons + recurring errors
+learned-behavior review --workspace "$PWD" --output json   # same, as JSON for scripts
 
 learned-behavior mine --workspace "$PWD"          # cluster error events into candidates
 learned-behavior mine-edits --workspace "$PWD"    # cluster repeated Edit self-corrections

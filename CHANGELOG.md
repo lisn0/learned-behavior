@@ -5,6 +5,7 @@ All notable changes to `learned-behavior` are documented here. The format follow
 ## [Unreleased]
 
 ### Added
+- `review --output json` — a stable, untruncated JSON shape (`workspace`, `since`, `include_candidates`, `repeated_failures[]`, `lessons[]`) so scripts and other tools can consume the review without parsing the human text. Default output is unchanged.
 - README "Privacy" section with stable `#privacy` anchor — explicit no-network / no-telemetry / no-third-parties guarantees, separate from the existing "Side effects & permissions" technical breakdown.
 
 ## [0.2.0] — 2026-04-25
