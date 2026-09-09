@@ -171,6 +171,12 @@ def parse_args() -> argparse.Namespace:
     review.add_argument("--workspace", required=True)
     review.add_argument("--days", type=int, default=14)
     review.add_argument("--limit", type=int, default=10)
+    review.add_argument(
+        "--output",
+        choices=("text", "json"),
+        default="text",
+        help="Output format. json is a stable, untruncated shape for scripts and other tools.",
+    )
     review.add_argument("--all", action="store_true",
                         help="Include candidate lessons (default: approved only)")
 
@@ -1026,8 +1032,37 @@ def command_review(args: argparse.Namespace) -> int:
         (workspace, args.limit),
     ).fetchall()
 
-    lines = [f"Continuous learning review for {workspace}"]
     filtered = [r for r in repeated if not _is_noise(normalize_error_text(r["summary"] or ""))]
+    if getattr(args, "output", "text") == "json":
+        print(json.dumps({
+            "workspace": workspace,
+            "since": since,
+            "include_candidates": bool(args.all),
+            "repeated_failures": [
+                {
+                    "fingerprint": row["fingerprint"],
+                    "tool_name": row["tool_name"],
+                    "summary": row["summary"],
+                    "count": row["count"],
+                    "last_seen": row["last_seen"],
+                }
+                for row in filtered
+            ],
+            "lessons": [
+                {
+                    "status": row["status"],
+                    "title": row["title"],
+                    "rule_text": row["rule_text"],
+                    "confidence": row["confidence"],
+                    "observations": row["observations"],
+                    "updated_at": row["updated_at"],
+                }
+                for row in lessons
+            ],
+        }, indent=2))
+        return 0
+
+    lines = [f"Continuous learning review for {workspace}"]
     if filtered:
         lines.append("")
         lines.append("Repeated failures:")
